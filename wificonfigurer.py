@@ -14,10 +14,9 @@ class WifiConfigurer:
         self.wifi_configurer_characteristic = aioble.Characteristic(ble_configuration_service,
                                                                     _BLE_WIFI_CONF_CHARACTERISTIC_UUID, read=True,
                                                                     write=True, notify=True, capture=True)
-        if dao is None:
+        self.dao = dao
+        if self.dao is None:
             self.dao = InMemoryDao()
-        else:
-            self.dao = dao
 
         self.onWifiConfigChange = onWifiConfigChange
 
@@ -49,28 +48,25 @@ class WifiConfigurer:
                 #print('Sanitized data: ', data)
 
                 previous_config_state = json.loads(json.dumps(self.wifi_config))
-                self.dao.save_raw_data(data)
 
                 self.wifi_config = self._parse_data(data)
-                
-                # Write it to make it readily available to ble client reads
-                encodedBinaryData = data.encode('utf-8')
-                self.wifi_configurer_characteristic.write(encodedBinaryData, send_update=True)
 
-                if self.onWifiConfigChange is not None and self.wifi_config != previous_config_state:
-                    #print(f"Doing change. onWifiConfigChange: {self.onWifiConfigChange}. previous_config_state: {previous_config_state}. self.wifi_config: {self.wifi_config}")
-                    self.onWifiConfigChange(self.wifi_config)
+                if self.wifi_config != previous_config_state:
+                    self.dao.save_raw_data(data)
+                    if self.onWifiConfigChange is not None:
+                        #print(f"Doing change. onWifiConfigChange: {self.onWifiConfigChange}. previous_config_state: {previous_config_state}. self.wifi_config: {self.wifi_config}")
+                        self.onWifiConfigChange(self.wifi_config)
+
+                # Write it to make it readily available to ble client reads
+                # Note that what's written has been sanitized
+                self.wifi_configurer_characteristic.write(data.encode('utf-8'), send_update=True)
             except asyncio.CancelledError:
                 # Catch the CancelledError
                 print("WIFI-Configurer task cancelled")
             except Exception as e:
                 print("Error in _wait_for_write:", e)
-            finally:
-                # Ensure the loop continues to the next iteration
-                await asyncio.sleep_ms(10)
 
     # Requires sanitized data
-    # This method is final and should be called by save_raw_data
     def _parse_data(self, data):
         result = {}
         if len(data) == 0:

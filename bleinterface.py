@@ -4,8 +4,8 @@ import asyncio
 import os
 import machine
 
-_DEVICE_CONF_SERVICE_UUID = UUID(0x181A)
-device_configurer_service = aioble.Service(_DEVICE_CONF_SERVICE_UUID)
+DEVICE_CONF_SERVICE_UUID = UUID(0x181A)
+device_configurer_service = aioble.Service(DEVICE_CONF_SERVICE_UUID)
 
 default_advertising_device_name = None
 try:
@@ -16,10 +16,10 @@ except Exception as e:
 _ADV_INTERVAL_US = const(250000)
 
 class BleInterface:
-    def __init__(self, device_onfigurations=[], advertising_device_name=None):
-        aioble.register_services(device_configurer_service)
+    def __init__(self, device_configurations=[], advertising_device_name=None, other_services=[], other_services_uuids=[]):
+        aioble.register_services(device_configurer_service, *other_services)
 
-        self.device_onfigurations = device_onfigurations
+        self.device_configurations = device_configurations
 
         if advertising_device_name is not None:
             self.advertising_device_name = advertising_device_name
@@ -28,11 +28,12 @@ class BleInterface:
         else:
             self.advertising_device_name = "ble_capable_device"
 
+        self.other_services_uuids = other_services_uuids
         self.connections = []
 
     def start(self):
         advertiser_task = asyncio.create_task(self._advertise_task())
-        config_tasks = list(map(lambda config: config.start(), self.device_onfigurations))
+        config_tasks = list(map(lambda config: config.start(), self.device_configurations))
         return asyncio.gather(advertiser_task, *config_tasks)
 
 
@@ -42,10 +43,10 @@ class BleInterface:
                 async with await aioble.advertise(
                         _ADV_INTERVAL_US,
                         name=self.advertising_device_name,
-                        services=[_DEVICE_CONF_SERVICE_UUID],
+                        services=[DEVICE_CONF_SERVICE_UUID] + self.other_services_uuids,
                 ) as connection:
                     self.connections.append(connection)
-                    print("Connection from", connection.device)
+                    #print("Connection from", connection.device)
                     await connection.disconnected()
                     if connection in self.connections:
                         self.connections.remove(connection)
@@ -53,7 +54,7 @@ class BleInterface:
                 # Catch the CancelledError
                 print("Peripheral task cancelled")
             except Exception as e:
-                print("Error in advertise_task:", e)
+                print("Error in _advertise_task:", e)
             finally:
                 # Ensure the loop continues to the next iteration
                 await asyncio.sleep_ms(100)

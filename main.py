@@ -18,6 +18,6 @@ async def main():
     while True:
         print(f"ssid: '{wifi_configurer.wifi_config['wifi_ssid']}'")
         print(f"passwd: '{wifi_configurer.wifi_config['wifi_password']}'")
-        await asyncio.sleep_ms(5000)
+        await asyncio.sleep_ms(6000)
 
 asyncio.run(main())
