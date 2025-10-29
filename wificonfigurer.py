@@ -10,23 +10,23 @@ def sanitize_data(data):
     return data.strip()
 
 class WifiConfigurer:
-    def __init__(self, ble_configuration_service, dao=None, onWifiConfigChange=None):
-        self.wifi_configurer_characteristic = aioble.Characteristic(ble_configuration_service,
+    def __init__(self, ble_configuration_service, dao=None, onChange=None):
+        self.wifi_configurer_characteristic = aioble.BufferedCharacteristic(ble_configuration_service,
                                                                     _BLE_WIFI_CONF_CHARACTERISTIC_UUID, read=True,
-                                                                    write=True, notify=True, capture=True)
+                                                                    write=True, notify=True, capture=True, max_len=512)
         self.dao = dao
         if self.dao is None:
             self.dao = InMemoryDao()
 
-        self.onWifiConfigChange = onWifiConfigChange
+        self.onChange = onChange
 
         self.wifi_config = {"wifi_ssid": None, "wifi_password": None}
 
         data = self.dao.retrieve_raw_data()
         self.wifi_config = self._parse_data(data)
 
-        if self.onWifiConfigChange is not None:
-            self.onWifiConfigChange(self.wifi_config)
+        if self.onChange is not None:
+            self.onChange(self.wifi_config)
 
         if data is not None and len(data) > 1:
             binary_data = data.encode('utf-8')
@@ -41,9 +41,9 @@ class WifiConfigurer:
         while True:
             try:
                 connection, data = await self.wifi_configurer_characteristic.written()
-                #print('Received data: ', data)
+                print('Received data: ', data)
                 data = data.decode()
-                #print('Decoded data: ', data)
+                print('Decoded data: ', data)
                 data = sanitize_data(data)
                 #print('Sanitized data: ', data)
 
@@ -53,9 +53,9 @@ class WifiConfigurer:
 
                 if self.wifi_config != previous_config_state:
                     self.dao.save_raw_data(data)
-                    if self.onWifiConfigChange is not None:
-                        #print(f"Doing change. onWifiConfigChange: {self.onWifiConfigChange}. previous_config_state: {previous_config_state}. self.wifi_config: {self.wifi_config}")
-                        self.onWifiConfigChange(self.wifi_config)
+                    if self.onChange is not None:
+                        #print(f"Doing change. onChange: {self.onChange}. previous_config_state: {previous_config_state}. self.wifi_config: {self.wifi_config}")
+                        self.onChange(self.wifi_config)
 
                 # Write it to make it readily available to ble client reads
                 # Note that what's written has been sanitized
@@ -76,6 +76,8 @@ class WifiConfigurer:
 
         tokens = data.split()
         result["wifi_ssid"] = tokens[0]
+
+        result["wifi_password"] = None
         if len(tokens) > 1:
             result["wifi_password"] = " ".join(tokens[1:])
 

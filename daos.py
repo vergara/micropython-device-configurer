@@ -26,11 +26,11 @@ class FileDao:
                 file_content = storage_file.readlines()
                 #print(f"file_content: {file_content}")
                 if len(file_content) > 1:
-                    print(f"Warning: found {len(file_content)} lines in storage file for wifi config. Expected was 1.")
+                    print(f"Warning: found {len(file_content)} lines in storage file for config. Expected was 1.")
                 if len(file_content) == 0:
                     # No config found
                     return ""
                 return file_content[0]
         except Exception as e:
-            print("Failed to read wifi config file:", e)
+            print("Failed to read config file:", e)
             return ""
