@@ -28,13 +28,12 @@ class WifiConfigurer:
         if self.onChange is not None:
             self.onChange(self.wifi_config)
 
+    def start(self):
+        data = self.dao.retrieve_raw_data()
         if data is not None and len(data) > 1:
             binary_data = data.encode('utf-8')
-            # You can write to the characteristic before bluetooth is even turned on and advertising
-            # We write the current config to make it accessible via bluetooth
             self.wifi_configurer_characteristic.write(binary_data, send_update=False)
 
-    def start(self):
         return asyncio.create_task(self._wait_for_write())
 
     async def _wait_for_write(self):

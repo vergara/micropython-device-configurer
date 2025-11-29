@@ -4,7 +4,7 @@ import asyncio
 import os
 import machine
 
-DEVICE_CONF_SERVICE_UUID = UUID(0x181A)
+DEVICE_CONF_SERVICE_UUID = UUID(0x002B)
 device_configurer_service = aioble.Service(DEVICE_CONF_SERVICE_UUID)
 
 default_advertising_device_name = None
