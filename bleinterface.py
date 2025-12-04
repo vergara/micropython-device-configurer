@@ -36,6 +36,9 @@ class BleInterface:
         config_tasks = list(map(lambda config: config.start(), self.device_configurations))
         return asyncio.gather(advertiser_task, *config_tasks)
 
+    def get_device_name(self):
+        global default_advertising_device_name
+        return default_advertising_device_name
 
     async def _advertise_task(self):
         while True:
