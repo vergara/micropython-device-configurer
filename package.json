@@ -1,11 +1,27 @@
 {
-	"name": "micropython-device-configurer",
 	"version": "1.0.0",
-	"description": "Configure esp32 device over bluetooth.",
-	"files": [
-		"bleinterface.py",
-		"daos.py",
-		"genericconfigurer.py",
-		"wificonfigurer.py"
+	"urls": [
+		[
+			"bleinterface.py",
+			"bleinterface.py"
+		],
+		[
+			"daos.py",
+			"daos.py"
+		],
+		[
+			"genericconfigurer.py",
+			"genericconfigurer.py"
+		],
+		[
+			"wificonfigurer.py",
+			"wificonfigurer.py"
+		]
+	],
+	"deps": [
+		[
+			"aioble",
+			"latest"
+		]
 	]
 }
