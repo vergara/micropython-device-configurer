@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"description": "Configure esp32 device over bluetooth.",
 	"dependencies": {
-		"requests": "^1.0.0"
+		"requests": "^0.9.1",
+		"aioble": "^0.6.1"
 	},
 	"files": [
 		"bleinterface.py",
