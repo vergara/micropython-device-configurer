@@ -3,19 +3,19 @@
 	"urls": [
 		[
 			"bleinterface.py",
-			"bleinterface.py"
+			"/bleinterface.py"
 		],
 		[
 			"daos.py",
-			"daos.py"
+			"/daos.py"
 		],
 		[
 			"genericconfigurer.py",
-			"genericconfigurer.py"
+			"/genericconfigurer.py"
 		],
 		[
 			"wificonfigurer.py",
-			"wificonfigurer.py"
+			"/wificonfigurer.py"
 		]
 	],
 	"deps": [
