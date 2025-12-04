@@ -2,9 +2,6 @@
 	"name": "micropython-device-configurer",
 	"version": "1.0.0",
 	"description": "Configure esp32 device over bluetooth.",
-	"dependencies": {
-		"aioble": "^0.6.1"
-	},
 	"files": [
 		"bleinterface.py",
 		"daos.py",
